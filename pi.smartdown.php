@@ -8,7 +8,7 @@
  * @copyright	Copyright (c) 2010, Stephen Lewis
  * @license   	http://creativecommons.org/licenses/by-nc-sa/3.0/ Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported
  * @link 		http://experienceinternet.co.uk/software/smartdown/
- * @version 	1.0.0
+ * @version 	1.0.1
  */
 
 // Should we even be here?
@@ -28,7 +28,7 @@ $plugin_info = array(
 	'pi_description'	=> 'Smarter Markdown, with PHP Markdown Extra and SmartyPants for spicy content goodness.',
 	'pi_name'			=> 'SmartDown',
 	'pi_usage'			=> Smartdown::usage(),
-	'pi_version'		=> '1.0.0'
+	'pi_version'		=> '1.0.1'
 );
 
 
@@ -107,7 +107,7 @@ class Smartdown {
 		}
 		
 		// Apply SmartyPants.
-		$smart_quotes = $ee->TMPL->fetch_param('smart_quotes') ? NULL : $ee->TMPL->fetch_param('smart_quotes');
+		$smart_quotes = $ee->TMPL->fetch_param('smart_quotes') ? '2' : $ee->TMPL->fetch_param('smart_quotes');
 		$this->return_data = SmartyPants($tagdata, $smart_quotes);
 	}
 	
