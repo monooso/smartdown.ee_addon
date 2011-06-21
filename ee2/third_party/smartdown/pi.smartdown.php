@@ -57,18 +57,27 @@ class Smartdown {
     public function __construct($tagdata = '')
     {
         $ee         =& get_instance();
+        $config     = $ee->config;
         $functions  = $ee->functions;
         $tmpl       = $ee->TMPL;
-        $tagdata    = $tagdata ? $tagdata : $tmpl->tagdata;
 
         $this->return_data  = '';
-        
-        // `encode_ee_tags` included, for legacy support.
-        if ($tmpl->fetch_param('encode_ee_tags') != 'yes' && $tmpl->fetch_param('ee_tags:encode') != 'yes')
+
+        if ($tagdata)
         {
-            $tagdata = Markdown($tagdata);
+            // Fieldtype.
+            $encode     = $config->item('smartdown:ee_tags:encode') == 'yes';
+            $fix_images = !($config->item('smartdown:ee_tags:fix_transplanted_images') == 'no');
         }
         else
+        {
+            // Template tag.
+            $tagdata    = $tmpl->tagdata;
+            $encode     = ($tmpl->fetch_param('ee_tags:encode') == 'yes') OR ($tmpl->fetch_param('encode_ee_tags') == 'yes');
+            $fix_images = !($tmpl->fetch_param('ee_tags:fix_transplanted_images') == 'no');
+        }
+
+        if ($encode)
         {
             $tagdata = Markdown($functions->encode_ee_tags($tagdata, TRUE));
 
@@ -83,10 +92,14 @@ class Smartdown {
             $tagdata = preg_replace('/&#123;(path=.*?)&#125;/i', '{$1}', $tagdata);
 
             // Play nicely with NSM Transplant and the {image_xx} technique.
-            if ($tmpl->fetch_param('ee_tags:fix_transplanted_images') != 'no')
+            if ($fix_images)
             {
                 $tagdata = preg_replace('/&#123;(image_[0-9]+)&#125;/i', '{$1}', $tagdata);
             }
+        }
+        else
+        {
+            $tagdata = Markdown($tagdata);
         }
         
         // Apply SmartyPants.
