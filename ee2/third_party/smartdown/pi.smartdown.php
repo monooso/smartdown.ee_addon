@@ -61,20 +61,23 @@ class Smartdown {
         $functions  = $ee->functions;
         $tmpl       = $ee->TMPL;
 
-        $this->return_data  = '';
+        $default_smartquotes    = '2';
+        $this->return_data      = '';
 
         if ($tagdata)
         {
             // Fieldtype.
-            $encode     = $config->item('smartdown:ee_tags:encode') == 'yes';
-            $fix_images = !($config->item('smartdown:ee_tags:fix_transplanted_images') == 'no');
+            $encode         = $config->item('smartdown:ee_tags:encode') == 'yes';
+            $fix_images     = !($config->item('smartdown:ee_tags:fix_transplanted_images') == 'no');
+            $smart_quotes   = $config->item('smartdown:smart_quotes') ? $config->item('smartdown:smart_quotes') : $default_smartquotes;
         }
         else
         {
             // Template tag.
-            $tagdata    = $tmpl->tagdata;
-            $encode     = ($tmpl->fetch_param('ee_tags:encode') == 'yes') OR ($tmpl->fetch_param('encode_ee_tags') == 'yes');
-            $fix_images = !($tmpl->fetch_param('ee_tags:fix_transplanted_images') == 'no');
+            $tagdata        = $tmpl->tagdata;
+            $encode         = ($tmpl->fetch_param('ee_tags:encode') == 'yes') OR ($tmpl->fetch_param('encode_ee_tags') == 'yes');
+            $fix_images     = !($tmpl->fetch_param('ee_tags:fix_transplanted_images') == 'no');
+            $smart_quotes   = $tmpl->fetch_param('smart_quotes') ? $tmpl->fetch_param('smart_quotes') : $default_smartquotes;
         }
 
         if ($encode)
@@ -102,8 +105,6 @@ class Smartdown {
             $tagdata = Markdown($tagdata);
         }
         
-        // Apply SmartyPants.
-        $smart_quotes       = $tmpl->fetch_param('smart_quotes') ? $tmpl->fetch_param('smart_quotes') : '2';
         $this->return_data  = SmartyPants($tagdata, $smart_quotes);
     }
     
@@ -117,38 +118,53 @@ class Smartdown {
     {
         ob_start();
 ?>
-        Formats the supplied text using Markdown Extra, and SmartyPants.
-        
-        Information about Markdown is available at http://daringfireball.net/projects/markdown/syntax.
-        Information about Markdown Extra is available at http://michelf.com/projects/php-markdown/extra/.
-        Information about SmartyPants is available at http://daringfireball.net/projects/smartypants/.
+## Overview ##
+Formats the supplied text using Markdown Extra, and SmartyPants.
 
-        Example usage:
-        {exp:smartdown}
-        
-            # Tasks #
-            
-            Stuff I really need to get done:
-            
-            * Finish SmartDown
-            * Release SmartDown
-            * Deal with flurry of SmartDown support requests
-            * Question why I ever released SmartDown
-            * Retire from public life
-        
-        {/exp:smartdown}
+* [Markdown documentation][markdown]
+* [Markdown Extra documentation][markdown_extra]
+* [SmartyPants documentation][smartypants]
 
-        Parameters:
-        
-        `ee_tags:encode`
-        Set to `yes`, to convert the curly braces for all EE tags and variables into entities. Default is `no`.
+[markdown]: http://daringfireball.net/projects/markdown/syntax "Read the Markdown documentation"
+[markdown_extra]: http://michelf.com/projects/php-markdown/extra/ "Read the Markdown Extra documentation"
+[smartypants]: http://daringfireball.net/projects/smartypants/ "Read the SmartyPants documentation"
 
-        `ee_tags:fix_transplanted_images`
-        Set to `no` to prevent `ee_tags:encode` from playing nicely with NSM Transplant and the `{image_xx}` technique. Default is `yes`.
+Example usage:
+
+    {exp:smartdown}
+
+        Stuff I really need to get done:
         
-        `smart_quotes`
-        Fine-grained control over SmartyPants' handling of smart quotes. Will never be used by 99% of you.
-        Nosey types should take a look at the SmartyPants source code.
+        * Finish SmartDown
+        * Release SmartDown
+        * Deal with flurry of SmartDown support requests
+        * Question why I ever released SmartDown
+        * Retire from public life
+
+    {/exp:smartdown}
+
+## Parameters ##
+`ee_tags:encode`
+: Set to `yes`, to convert the curly braces for all EE tags and variables into entities. Default is `no`.
+
+`ee_tags:fix_transplanted_images`
+: Set to `no` to prevent `ee_tags:encode` from playing nicely with NSM Transplant and the `{image_xx}` technique. Default is `yes`.
+
+`smart_quotes`
+: Fine-grained control over SmartyPants' handling of smart quotes. Will never be used by 99% of you.
+Nosey types should take a look at the SmartyPants source code.
+
+## Fieldtype parameters ##
+The SmartDown fieldtype may be configured using `config.php`. This makes it possible to set any of the supported SmartDown parameters directly in the fieldtype, without the requirement to use the `{exp:smartdown}` template tag.
+
+`$config['smartdown:ee_tags:encode']`
+: Mirrors the `ee_tags:encode` template tag.
+
+`$config['smartdown:ee_tags:fix_transplanted_images']`
+: Mirrors the `ee_tags:fix_transplanted_images` template tag.
+
+`$config['smartdown:smart_quotes']`
+: Mirrors the `smart_quotes` template tag.
 
 <?php
 
