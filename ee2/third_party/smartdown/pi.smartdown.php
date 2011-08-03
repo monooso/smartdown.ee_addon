@@ -67,6 +67,8 @@ class Smartdown {
         if ($tagdata)
         {
             // Fieldtype.
+            $disable_md     = $config->item('smartdown:disable:markdown') == 'yes';
+            $disable_sp     = $config->item('smartdown:disable:smartypants') == 'yes';
             $encode         = $config->item('smartdown:ee_tags:encode') == 'yes';
             $fix_images     = !($config->item('smartdown:ee_tags:fix_transplanted_images') == 'no');
             $smart_quotes   = $config->item('smartdown:smart_quotes') ? $config->item('smartdown:smart_quotes') : $default_smartquotes;
@@ -75,37 +77,47 @@ class Smartdown {
         {
             // Template tag.
             $tagdata        = $tmpl->tagdata;
+            $disable_md     = $tmpl->fetch_param('disable:markdown') == 'yes';
+            $disable_sp     = $tmpl->fetch_param('disable:smartypants') == 'yes';
             $encode         = ($tmpl->fetch_param('ee_tags:encode') == 'yes') OR ($tmpl->fetch_param('encode_ee_tags') == 'yes');
             $fix_images     = !($tmpl->fetch_param('ee_tags:fix_transplanted_images') == 'no');
             $smart_quotes   = $tmpl->fetch_param('smart_quotes') ? $tmpl->fetch_param('smart_quotes') : $default_smartquotes;
         }
 
-        if ($encode)
+        if ( ! $disable_md)
         {
-            $tagdata = Markdown($functions->encode_ee_tags($tagdata, TRUE));
-
-            // Fix EE code samples.
-            $tagdata = preg_replace_callback(
-                '|' .preg_quote('<code>') .'(.*?)' .preg_quote('</code>') .'|s',
-                array($this, '_fix_encoded_ee_code_samples'),
-                $tagdata
-            );
-
-            // Fix {path=} URLs.
-            $tagdata = preg_replace('/&#123;(path=.*?)&#125;/i', '{$1}', $tagdata);
-
-            // Play nicely with NSM Transplant and the {image_xx} technique.
-            if ($fix_images)
+            if ($encode)
             {
-                $tagdata = preg_replace('/&#123;(image_[0-9]+)&#125;/i', '{$1}', $tagdata);
+                $tagdata = Markdown($functions->encode_ee_tags($tagdata, TRUE));
+
+                // Fix EE code samples.
+                $tagdata = preg_replace_callback(
+                    '|' .preg_quote('<code>') .'(.*?)' .preg_quote('</code>') .'|s',
+                    array($this, '_fix_encoded_ee_code_samples'),
+                    $tagdata
+                );
+
+                // Fix {path=} URLs.
+                $tagdata = preg_replace('/&#123;(path=.*?)&#125;/i', '{$1}', $tagdata);
+
+                // Play nicely with NSM Transplant and the {image_xx} technique.
+                if ($fix_images)
+                {
+                    $tagdata = preg_replace('/&#123;(image_[0-9]+)&#125;/i', '{$1}', $tagdata);
+                }
+            }
+            else
+            {
+                $tagdata = Markdown($tagdata);
             }
         }
-        else
-        {
-            $tagdata = Markdown($tagdata);
-        }
         
-        $this->return_data  = SmartyPants($tagdata, $smart_quotes);
+        if ( ! $disable_sp)
+        {
+            $tagdata = SmartyPants($tagdata, $smart_quotes);
+        }
+
+        $this->return_data  = $tagdata;
     }
     
     
