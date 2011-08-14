@@ -190,8 +190,8 @@ The SmartDown fieldtype may be configured using `config.php`. This makes it poss
     private function _fix_encoded_ee_code_samples($matches)
     {
         $parsed = str_replace(
-            array('&amp;#123;&amp;#47;', '&amp;#123;', '&amp;#125;'),
-            array('&#123;&#47;', '&#123;', '&#125;'),
+            array('&amp;#123;&amp;#47;', '&amp;#123;', '&amp;#125;', '&amp;lt;', '&amp;gt;'),
+            array('&#123;&#47;', '&#123;', '&#125;', '&lt;', '&gt;'),
             $matches[0]
         );
 
