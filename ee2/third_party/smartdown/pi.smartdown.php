@@ -134,12 +134,6 @@ class Smartdown {
                 array($this, '_fix_encoded_ee_code_samples'),
                 $tagdata
             );
-
-            // Fix {path=} URLs.
-            // $tagdata = preg_replace('/&#123;(path=.*?)&#125;/i', '{$1}', $tagdata);
-
-            // Play nicely with NSM Transplant and the {image_xx} technique.
-            // $tagdata = preg_replace('/&#123;(image_[0-9]+)&#125;/i', '{$1}', $tagdata);
         }
         
         // SmartyPants.
