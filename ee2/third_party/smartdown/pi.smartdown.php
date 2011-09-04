@@ -110,6 +110,12 @@ class Smartdown {
             $tagdata = $functions->encode_ee_tags($tagdata, TRUE);
         }
 
+        // Pre-processing hook.
+        if ($ee->extensions->active_hook('smartdown_parse_start') === TRUE)
+        {
+            $tagdata = $ee->extensions->call('smartdown_parse_start', $tagdata, $settings);
+        }
+
         // Markdown.
         if ( ! $settings['disable:markdown'])
         {
@@ -142,7 +148,13 @@ class Smartdown {
             $tagdata = SmartyPants($tagdata, $settings['smart_quotes']);
         }
 
-        $this->return_data  = $tagdata;
+        // Post-processing hook.
+        if ($ee->extensions->active_hook('smartdown_parse_end') === TRUE)
+        {
+            $tagdata = $ee->extensions->call('smartdown_parse_end', $tagdata, $settings);
+        }
+
+        $this->return_data = $tagdata;
     }
     
     
