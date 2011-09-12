@@ -61,7 +61,8 @@ class Smartdown {
         $functions  = $ee->functions;
         $tmpl       = $ee->TMPL;
 
-        $this->return_data = '';
+        $default_quotes     = 2;
+        $this->return_data  = '';
 
         /**
          * Establish the default settings, and override them with
@@ -72,7 +73,7 @@ class Smartdown {
             'disable:markdown'      => $config->item('disable:markdown', 'smartdown') === TRUE ? TRUE : FALSE,
             'disable:smartypants'   => $config->item('disable:smartypants', 'smartdown') === TRUE ? TRUE : FALSE,
             'ee_tags:encode'        => $config->item('ee_tags:encode', 'smartdown') === TRUE ? TRUE : FALSE,
-            'smart_quotes'          => $config->item('smart_quotes', 'smartdown') ? $config->item('smart_quotes', 'smartdown') : '2'
+            'smart_quotes'          => $config->item('smart_quotes', 'smartdown') ? $config->item('smart_quotes', 'smartdown') : $default_quotes
         );
 
         if ( ! $tagdata)
@@ -103,6 +104,11 @@ class Smartdown {
                     : $settings['smart_quotes']
             );
         }
+
+        // smart_quotes must be a non-negative integer.
+        $settings['smart_quotes'] = $this->_valid_int($settings['smart_quotes'], 0)
+            ? (int) $settings['smart_quotes']
+            : $default_quotes;
 
         // Encode EE tags.
         if ($settings['ee_tags:encode'])
@@ -245,6 +251,36 @@ The SmartDown config settings should take the form of an associative array. All 
     }
 
 
+	/**
+	 * Determines whether the supplied argument is, or can be evaluated to,
+	 * a valid integer.
+	 *
+	 * @param	mixed		$value		The value to check.
+	 * @param	mixed		$min		The minimum permissible value.
+	 * @param	mixed		$max		The maximum permissible value.
+	 * @return	bool
+	 */
+	private function _valid_int($value, $min = NULL, $max = NULL)
+	{
+		$valid = (is_int($value) OR (is_numeric($value) && intval($value) == $value));
+		
+		// If no bounds have been set, we're done.
+		if ( ! $valid OR (is_null($min) && is_null($max)))
+		{
+			return $valid;
+		}
+		
+		$min = is_null($min) ? -INF : ($this->_valid_int($min) ? intval($min) : -INF);
+		$max = is_null($max) ? INF : ($this->_valid_int($max) ? intval($max) : INF);
+		
+		$value		= intval($value);
+		$real_min	= min($min, $max);
+		$real_max	= max($min, $max);
+		
+		return $valid && (min(max($value, $real_min), $real_max) === $value);
+	}
+
+	
 }
 
 
