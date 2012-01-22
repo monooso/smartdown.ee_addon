@@ -70,10 +70,18 @@ class Smartdown {
          */
 
         $settings = array(
-            'disable:markdown'      => $config->item('disable:markdown', 'smartdown') === TRUE ? TRUE : FALSE,
-            'disable:smartypants'   => $config->item('disable:smartypants', 'smartdown') === TRUE ? TRUE : FALSE,
-            'ee_tags:encode'        => $config->item('ee_tags:encode', 'smartdown') === TRUE ? TRUE : FALSE,
-            'smart_quotes'          => $config->item('smart_quotes', 'smartdown') ? $config->item('smart_quotes', 'smartdown') : $default_quotes
+          'disable:markdown'
+            => ($config->item('disable:markdown', 'smartdown') === TRUE),
+          'disable:smartypants'
+            => ($config->item('disable:smartypants', 'smartdown') === TRUE),
+          'ee_tags:encode'
+            => ($config->item('ee_tags:encode', 'smartdown') === TRUE),
+
+          'smart_quotes' => $config->item('smart_quotes', 'smartdown')
+            ? $config->item('smart_quotes', 'smartdown') : $default_quotes,
+
+          'ee_tags:preserve_images'
+            => ($config->item('ee_tags:preserve_images', 'smartdown') === TRUE)
         );
 
         if ( ! $tagdata)
@@ -87,33 +95,47 @@ class Smartdown {
              */
 
             $settings = array(
-                'disable:markdown' => $tmpl->fetch_param('disable:markdown')
-                    ? ($tmpl->fetch_param('disable:markdown') == 'yes')
-                    : $settings['disable:markdown'],
+              'disable:markdown' => $tmpl->fetch_param('disable:markdown') == 'yes'
+                ? TRUE : $settings['disable:markdown'],
 
-                'disable:smartypants' => $tmpl->fetch_param('disable:smartypants')
-                    ? ($tmpl->fetch_param('disable:smartypants') == 'yes')
-                    : $settings['disable:smartypants'],
-                    
-                'ee_tags:encode' => $tmpl->fetch_param('ee_tags:encode')
-                    ? ($tmpl->fetch_param('ee_tags:encode') == 'yes')
-                    : $settings['ee_tags:encode'],
-                    
-                'smart_quotes' => $tmpl->fetch_param('smart_quotes')
-                    ? $tmpl->fetch_param('smart_quotes')
-                    : $settings['smart_quotes']
+              'disable:smartypants' => $tmpl->fetch_param('disable:smartypants') == 'yes'
+                ? TRUE : $settings['disable:smartypants'],
+                  
+              'ee_tags:encode' => $tmpl->fetch_param('ee_tags:encode') == 'yes'
+                ? TRUE : $settings['ee_tags:encode'],
+
+              'ee_tags:preserve_images' => $tmpl->fetch_param('ee_tags:preserve_images') == 'yes'
+                ? TRUE : $settings['ee_tags:preserve_images'],
+                  
+              'smart_quotes' => $tmpl->fetch_param('smart_quotes', $settings['smart_quotes'])
             );
         }
 
         // smart_quotes must be a non-negative integer.
         $settings['smart_quotes'] = $this->_valid_int($settings['smart_quotes'], 0)
-            ? (int) $settings['smart_quotes']
-            : $default_quotes;
+          ? (int) $settings['smart_quotes']
+          : $default_quotes;
 
         // Encode EE tags.
         if ($settings['ee_tags:encode'])
         {
-            $tagdata = $functions->encode_ee_tags($tagdata, TRUE);
+          $tagdata = $functions->encode_ee_tags($tagdata, TRUE);
+
+          /**
+           * TRICKY:
+           * NSM Transplant is commonly used for image replacement with 
+           * Markdown and Textile formatted text. When Smartdown encodes the 
+           * EE tags, it also encodes the {image_x} tags used for image 
+           * replacement, meaning the NSM Transplant stops working. Not good.
+           *
+           * The solution is to "de-encode" {image_x} tags.
+           */
+
+          if ($settings['ee_tags:preserve_images'])
+          {
+            $tagdata = preg_replace(
+              '/&#123;image_(\d+)&#125;/', LD .'image_$1' .RD, $tagdata);
+          }
         }
 
         // Pre-processing hook.
