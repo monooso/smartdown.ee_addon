@@ -7,7 +7,7 @@
  * @copyright       Experience Internet
  * @link            http://experienceinternet.co.uk/software/smartdown/
  * @package         Smartdown
- * @version         1.2.1
+ * @version         1.3.0
  */
 
 require_once PATH_THIRD .'smartdown/markdown/markdown.php';
