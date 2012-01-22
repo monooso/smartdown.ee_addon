@@ -20,7 +20,7 @@ $plugin_info = array(
     'pi_description'    => 'Smarter Markdown, with PHP Markdown Extra and SmartyPants for spicy content goodness.',
     'pi_name'           => 'SmartDown',
     'pi_usage'          => Smartdown::usage(),
-    'pi_version'        => '1.2.1'
+    'pi_version'        => '1.3.0'
 );
 
 
