@@ -7,7 +7,7 @@
  * @copyright       Experience Internet
  * @link            http://experienceinternet.co.uk/software/smartdown/
  * @package         Smartdown
- * @version         1.3.0
+ * @version         1.3.1
  */
 
 require_once PATH_THIRD .'smartdown/markdown/markdown.php';
@@ -20,7 +20,7 @@ $plugin_info = array(
   'pi_description'    => 'Smarter Markdown, with PHP Markdown Extra and SmartyPants for spicy content goodness.',
   'pi_name'           => 'SmartDown',
   'pi_usage'          => Smartdown::usage(),
-  'pi_version'        => '1.3.0'
+  'pi_version'        => '1.3.1'
 );
 
 
