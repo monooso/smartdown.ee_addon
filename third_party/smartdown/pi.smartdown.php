@@ -177,7 +177,7 @@ class Smartdown {
   {
     ob_start();
 ?>
-## Overview ##
+# Overview #
 Formats the supplied text using Markdown Extra, and SmartyPants.
 
 * [Markdown documentation][markdown]
@@ -188,21 +188,35 @@ Formats the supplied text using Markdown Extra, and SmartyPants.
 [markdown_extra]: http://michelf.com/projects/php-markdown/extra/ "Read the Markdown Extra documentation"
 [smartypants]: http://daringfireball.net/projects/smartypants/ "Read the SmartyPants documentation"
 
-Example usage:
+# Usage Instructions #
+You can specify SmartDown as the default text formatting for a custom field, or 
+use it directly in your templates.
 
-    {exp:smartdown}
+## Option 1: Default text formatting ##
+To specify SmartDown as the default text formatting for a custom field, select 
+it from the "Default Text Formatting for This Field" drop-down on the "Create / 
+Edit a Custom Field" page.
 
-        Stuff I really need to get done:
-        
-        * Finish SmartDown
-        * Release SmartDown
-        * Deal with flurry of SmartDown support requests
-        * Question why I ever released SmartDown
-        * Retire from public life
+### How to add SmartDown to the text formatting drop-down ###
+Unfortunately, there’s no way to include SmartDown in the default text 
+formatting drop-down. Instead, you’ll need to create your new custom field, save 
+it, then edit it and click the "Edit List" link next to the text formatting 
+drop-down.
 
-    {/exp:smartdown}
+Set SmartDown to "Yes" in the "Field Formatting Options" list, click update, and 
+you’ll be returned to the "Edit a Custom Field" page. You can now select 
+SmartDown from the text formatting drop-down.
 
-## Parameters ##
+## Option 2: Template tag pair ##
+Specifying SmartDown as the default text formatting for a custom field will 
+cause ExpressionEngine to automatically format your text using SmartDown, with 
+no need for additional template tags.
+
+If you’d like to format an arbitrary text string using SmartDown, you can do so 
+directly in your templates using the `exp:smartdown` tag pair.
+
+The SmartDown tag pair supports the following parameters:
+
 `disable:markdown`
 : Set to `yes` to disable Markdown. Default is `no`.
 
@@ -210,29 +224,63 @@ Example usage:
 : Set to `yes` to disable SmartyPants. Default is `no`.
 
 `ee_tags:encode`
-: Set to `yes`, to convert the curly braces for all EE tags and variables into 
-entities. Default is `no`.
+: When set to `yes`, the curly braces for all ExpressionEngine tags and 
+variables are converted into HTML entities. Default is `no`. See below for more 
+information about tag encoding.
+
+`ee_tags:encode_path`
+: When set to `yes`, the ExpressionEngine `{path=...}` tags will be encoded. 
+Default is no, even if `ee_tags:encode` is set to `yes`.
 
 `smart_quotes`
 : Fine-grained control over SmartyPants' handling of smart quotes. Will never be 
 used by 99% of you. Nosey types should take a look at the SmartyPants source 
 code.
 
-## Fieldtype parameters ##
-The SmartDown fieldtype may be configured using `config.php`. This makes it 
-possible to set any of the supported SmartDown parameters directly in the 
-fieldtype, without the requirement to use the `{exp:smartdown}` template tag.
+## Configuring SmartDown using `config.php` ##
+You can specify default SmartDown parameters in your `config.php` file. These 
+defaults can be overridden on a per-template tag basis.
 
-The SmartDown config settings should take the form of an associative array. All 
-of the documented template parameters are supported, the only difference being 
-that `TRUE` should be used instead of `yes`, and `FALSE` instead of `no`.
-
-    $config['smartdown'] => array(
-        'disable:markdown'      => TRUE,        // TRUE or FALSE. Default is FALSE.
-        'disable:smartypants'   => TRUE,        // TRUE or FALSE. Default is FALSE.
-        'ee_tags:encode'        => TRUE,        // TRUE or FALSE. Default is FALSE.
-        'smart_quotes'          => 1            // Default is 2.
+    // config.php
+    $config['smartdown'] = array(
+      'disable:markdown'    => TRUE,
+      'disable:smartypants' => TRUE,
+      'ee_tags:encode'      => TRUE,
+      'smart_quotes'        => 1
     );
+
+    {!-- Overriding the config.php defaults. --}
+    {exp:smartdown
+        disable:markdown='no'
+        disable:smartpants='no'
+        ee_tags:encode='no'
+        ee_tags:encode_path='no'
+        smart_quotes='2'
+    }
+
+## A note about tag encoding ##
+When dealing with database content, ExpressionEngine automatically encodes 
+anything that looks like an EE tag or variable.
+
+As such, you should typically leave the `ee_tags:encode` option set to its 
+default value of `no`. The only time you might want to change this is when 
+processing an arbitrary string of hard-coded text.
+
+For example:
+
+    {!-- The curly braces around "this_tag" will be encoded. --}
+    {exp:smartdown ee_tags:encode='yes'}
+        Encode {this_tag} please.
+    {/exp:smartdown}
+
+### Tag encoding and code samples ###
+One unfortunate side-effect of ExpressionEngine’s fastidious encoding of curly 
+braces is that it can cause problems with Markdown-formatted sample EE code. 
+Curly braces may be double-encoded, causing all manner of display problems, and 
+a general malaise.
+
+SmartDown undoes the damage done by EE to your precious code samples, so they 
+display correctly.
 
 <?php
 
